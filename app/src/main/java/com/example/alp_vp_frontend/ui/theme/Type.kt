@@ -1,4 +1,4 @@
-package com.example.alp_vp_frontend.ui.theme
+package com.example.labweek7.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
