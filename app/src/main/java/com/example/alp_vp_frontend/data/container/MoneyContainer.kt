@@ -30,19 +30,19 @@ class MoneyContainer(context: Context) {
 
 
     // Services
-    val publicMoneyService: MoneyService by lazy {
-        publicRetrofit.create(MoneyService::class.java)
-    }
+//    val publicActivityService: MoneyService by lazy {
+//        publicRetrofit.create(MoneyService::class.java)
+//    }
 
     val privateMoneyService: MoneyService by lazy {
         privateRetrofit.create(MoneyService::class.java)
     }
 
     // Repository
-    val moneyRepository: MoneyRepository by lazy {
-        MoneyRepository(
-            publicApi = publicMoneyService,
-            privateApi = privateMoneyService
-        )
-    }
+//    val moneyRepository: MoneyRepository by lazy {
+//        MoneyRepository(
+//            publicApi = publicMoneyService,
+//            privateApi = privateMoneyService
+//        )
+//    }
 }
