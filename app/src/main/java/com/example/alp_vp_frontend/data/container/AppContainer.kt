@@ -1,55 +1,55 @@
 package com.example.alp_vp_frontend.data.container
 
-import com.example.alp_vp_frontend.data.repository.ActivityRepository
+import android.content.Context
+import com.example.alp_vp_frontend.data.local.TokenManager
+import com.example.alp_vp_frontend.data.local.AuthInterceptor
 import com.example.alp_vp_frontend.data.repository.UserRepository
-import com.example.alp_vp_frontend.data.service.ActivityService
-// import com.example.alp_vp_frontend.data.service.UserService // Untuk Login nanti
+import com.example.alp_vp_frontend.data.service.UserService
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+class AppContainer(context: Context) {
 
-class AppContainer {
+    companion object {
+        const val BASE_URL = "http://192.168.56.1:3002/" // Emulator ke backend NodeJS
+    }
 
+    private val tokenManager = TokenManager(context)
 
-    private val baseUrl = "http://10.0.2.2:3000/"
-
-    // Membuat mesin koneksi internet (Retrofit)
-    private val retrofit: Retrofit = Retrofit.Builder()
-        .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl(baseUrl)
+    // ================
+    // OKHTTP for PRIVATE ENDPOINT (with Token)
+    // ================
+    private val authClient = OkHttpClient.Builder()
+        .addInterceptor(AuthInterceptor(tokenManager))
         .build()
 
-    // ==================
-    //  SERVICES
-    // ==================
+    // ================
+    // PUBLIC RETROFIT (NO TOKEN)
+    // ================
+    private val publicRetrofit = Retrofit.Builder()
+        .baseUrl("${BASE_URL}api/public/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
-    // Membuat "Telepon" untuk berbicara dengan API Activity
-    private val activityService: ActivityService by lazy {
-        retrofit.create(ActivityService::class.java)
-    }
+    val publicUserService: UserService =
+        publicRetrofit.create(UserService::class.java)
 
-    // Nanti, kita akan buat "Telepon" untuk Login di sini
-    // private val userService: UserService by lazy { ... }
+    // ================
+    // PRIVATE RETROFIT (WITH TOKEN)
+    // ================
+    private val privateRetrofit = Retrofit.Builder()
+        .baseUrl("${BASE_URL}api/private/")
+        .client(authClient)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
+    val privateUserService: UserService =
+        privateRetrofit.create(UserService::class.java)
 
-    // ==================
-    //  REPOSITORIES
-    // ==================
-
-    // MEMBUAT "MESIN" ActivityRepository dengan cara yang benar
-    val activityRepository: ActivityRepository by lazy {
-        ActivityRepository(activityService)
-    }
-
-    // Karena Login belum dikerjakan, UserRepository kita buat "kosongan"
-    // Ini mungkin masih error jika UserRepository Anda butuh UserService,
-    // tapi kita akan fokus pada Activity dulu.
-    // Jika ini error, kita akan buat UserService palsu.
-    val userRepository: UserRepository by lazy {
-        // Untuk sementara, kita tidak akan menggunakannya.
-        // Baris ini akan kita perbaiki saat mengerjakan fitur Login.
-        // Kita tidak bisa memberikan 'null' jika constructor tidak memperbolehkannya.
-        // Jadi kita tinggalkan ini untuk nanti.
-        TODO("Create UserService and then initialize UserRepository")
-    }
+    // ================
+    // REPOSITORY
+    // ================
+    val userRepository: UserRepository =
+        UserRepository(publicUserService, privateUserService, tokenManager)
 }

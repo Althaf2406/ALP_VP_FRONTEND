@@ -7,39 +7,48 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.alp_vp_frontend.ui.viewmodel.AuthViewModel
 
 @Composable
-fun LoginView(
+fun RegisterView(
     viewModel: AuthViewModel,
-    onLoginSuccess: () -> Unit,
-    onNavigateRegister: () -> Unit
+    onRegisterSuccess: () -> Unit,
+    onBackToLogin: () -> Unit
 ) {
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
     val loading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val success by viewModel.success.collectAsState()
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     LaunchedEffect(success) {
         if (success) {
             viewModel.resetState()
-            onLoginSuccess()
+            onRegisterSuccess()
         }
     }
 
-
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
 
-        Text("Login", fontSize = 24.sp)
+        Text("Register", fontSize = 24.sp)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         OutlinedTextField(
             value = email,
@@ -56,20 +65,27 @@ fun LoginView(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
-            onClick = { viewModel.login(email, password) },
-            enabled = !loading,
-            modifier = Modifier.fillMaxWidth()
+            onClick = {
+                viewModel.register(username, email, password)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !loading
         ) {
-            Text(if (loading) "Loading..." else "Login")
+            Text(if (loading) "Loading..." else "Register")
         }
 
         error?.let {
+            Spacer(modifier = Modifier.height(8.dp))
             Text(it, color = Color.Red)
         }
 
-        TextButton(onClick = onNavigateRegister) {
-            Text("Register")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = onBackToLogin) {
+            Text("Sudah punya akun? Login")
         }
     }
 }

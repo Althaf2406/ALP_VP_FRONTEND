@@ -1,6 +1,8 @@
 package com.example.alp_vp_frontend.data.repository
 
+import com.example.alp_vp_frontend.data.dto.CreateMoneyRequest
 import com.example.alp_vp_frontend.data.dto.Money
+import com.example.alp_vp_frontend.data.dto.UpdateMoneyRequest
 import com.example.alp_vp_frontend.data.service.MoneyService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,33 +38,28 @@ class MoneyRepository(
     // ==============================
     // CREATE MONEY
     // ==============================
-    suspend fun createMoney(body: Money) = withContext(Dispatchers.IO) {
-        try {
-            privateApi.createMoney(body)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+    suspend fun createMoney(
+        request: CreateMoneyRequest
+    ) = withContext(Dispatchers.IO) {
+        privateApi.createMoney(request)
     }
+
 
     // ==============================
     // UPDATE MONEY
     // ==============================
-    suspend fun updateMoney(id: Int, body: Money) = withContext(Dispatchers.IO) {
+    suspend fun updateMoney(
+        id: Int,
+        request: UpdateMoneyRequest
+    ) = withContext(Dispatchers.IO) {
         try {
-            val map = mutableMapOf<String, Any>()
-
-            body.title?.let { map["title"] = it }
-            body.description?.let { map["description"] = it }
-            body.amount?.let { map["amount"] = it }
-            body.type?.let { map["type"] = it }
-
-            privateApi.updateMoney(id, map)
+            privateApi.updateMoney(id, request)
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
+
 
     // ==============================
     // DELETE MONEY
