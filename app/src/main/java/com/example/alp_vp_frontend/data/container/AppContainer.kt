@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class AppContainer(context: Context) {
 
     companion object {
-        const val BASE_URL = "http://10.0.2.2:3002/" // Emulator ke backend NodeJS
+        const val BASE_URL = "http://192.168.56.1:3002/" // Emulator ke backend NodeJS
     }
 
     private val tokenManager = TokenManager(context)

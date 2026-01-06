@@ -9,10 +9,11 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+
 class MoneyContainer(context: Context) {
 
     companion object {
-        const val BASE_URL = "http://10.0.2.2:3002/"
+        const val BASE_URL = "http://192.168.56.1:3002/"
     }
 
     private val tokenManager = TokenManager(context)
@@ -29,11 +30,7 @@ class MoneyContainer(context: Context) {
         .build()
 
 
-    // Services
-    val publicMoneyService: MoneyService by lazy {
-        publicRetrofit.create(MoneyService::class.java)
-    }
-
+    //Services
     val privateMoneyService: MoneyService by lazy {
         privateRetrofit.create(MoneyService::class.java)
     }
@@ -41,7 +38,6 @@ class MoneyContainer(context: Context) {
     // Repository
     val moneyRepository: MoneyRepository by lazy {
         MoneyRepository(
-            publicApi = publicMoneyService,
             privateApi = privateMoneyService
         )
     }

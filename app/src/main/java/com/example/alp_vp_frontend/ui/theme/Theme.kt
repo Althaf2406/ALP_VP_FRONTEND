@@ -1,4 +1,4 @@
-package com.example.labweek7.ui.theme
+package com.example.alp_vp_frontend.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -34,7 +34,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun LabWeek7Theme(
+fun ALP_VP_FRONTENDTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
