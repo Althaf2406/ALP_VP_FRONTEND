@@ -1,197 +1,342 @@
 package com.example.alp_vp_frontend.ui.screen
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-// --- Imports Picker ---
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.widget.DatePicker
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import java.time.format.DateTimeFormatter
-// --- Akhir Imports Picker ---
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.alp_vp_frontend.viewmodel.ItemViewModel
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+// --- COLOR PALETTE ---
+private val BgGray = Color(0xFFF8F9FA)
+private val CardWhite = Color(0xFFFFFFFF)
+private val PrimaryPurple = Color(0xFF5F33E1)
+private val TextGray = Color(0xFF8E8E93)
+private val IconPinkBg = Color(0xFFFFD1DC)
+private val IconPurpleBg = Color(0xFFEAE6FF)
+
 @Composable
 fun AddTaskScreen(
     navController: NavController,
     viewModel: ItemViewModel
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Tambah Task Baru", fontWeight = FontWeight.SemiBold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Kembali")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        AddTaskContent(
+    // Container Utama
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BgGray)
+            .statusBarsPadding() // PENTING: Agar header tidak tertutup jam/status bar HP
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        // 1. HEADER
+        AddTaskHeader(onBack = { navController.popBackStack() })
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // 2. FORM CONTENT
+        AddTaskForm(
             viewModel = viewModel,
-            onTaskCreated = { navController.popBackStack() },
-            modifier = Modifier.padding(padding)
+            onTaskCreated = { navController.popBackStack() }
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTaskContent(
+fun AddTaskHeader(onBack: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack) {
+            // Gunakan Icons.Filled.ArrowBack (Standar) agar pasti aman & bisa diklik
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.Black
+            )
+        }
+
+        Text(
+            text = "Add Task",
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = Color.Black
+            )
+        )
+
+        Icon(
+            imageVector = Icons.Outlined.Notifications,
+            contentDescription = "Notification",
+            tint = Color.Black
+        )
+    }
+}
+
+@Composable
+fun AddTaskForm(
     viewModel: ItemViewModel,
-    onTaskCreated: () -> Unit,
-    modifier: Modifier = Modifier
+    onTaskCreated: () -> Unit
 ) {
-    // --- STATE INPUT ---
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var difficulty by remember { mutableStateOf("Hard") }
+    val difficulties = listOf("Easy", "Medium", "Hard")
 
-    // STATE DIFFICULTY
-    var difficulty by remember { mutableStateOf("None") } // <-- STATE INI SUDAH KEMBALI
-    val difficulties = listOf("None", "Easy", "Medium", "Hard") // <-- DAFTAR INI SUDAH KEMBALI
-
-    // STATE DEADLINE (Picker Logic)
+    // Picker Logic
     var selectedDateTime by remember {
         mutableStateOf(LocalDateTime.now().plusDays(1).withSecond(0).withNano(0))
     }
-
-    val displayFormatter = remember {
-        DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
-    }
-    val backendFormatter = remember {
-        DateTimeFormatter.ISO_LOCAL_DATE_TIME
-    }
-
+    val displayFormatter = DateTimeFormatter.ofPattern("d MMMM, yyyy HH:mm a")
+    val backendFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
     val context = LocalContext.current
 
-    // --- Time Picker Dialog Setup ---
     val timePickerDialog = TimePickerDialog(
         context,
         { _, hour: Int, minute: Int ->
-            selectedDateTime = selectedDateTime
-                .withHour(hour)
-                .withMinute(minute)
+            selectedDateTime = selectedDateTime.withHour(hour).withMinute(minute)
         },
-        selectedDateTime.hour,
-        selectedDateTime.minute,
-        true // Format 24 jam
+        selectedDateTime.hour, selectedDateTime.minute, true
     )
 
-    // --- Date Picker Dialog Setup ---
     val datePickerDialog = DatePickerDialog(
         context,
         { _: DatePicker, year: Int, month: Int, day: Int ->
-            selectedDateTime = selectedDateTime
-                .withYear(year)
-                .withMonth(month + 1)
-                .withDayOfMonth(day)
-            timePickerDialog.show() // Tampilkan Time Picker setelah Date dipilih
+            selectedDateTime = selectedDateTime.withYear(year).withMonth(month + 1).withDayOfMonth(day)
+            timePickerDialog.show()
         },
-        selectedDateTime.year,
-        selectedDateTime.monthValue - 1,
-        selectedDateTime.dayOfMonth
+        selectedDateTime.year, selectedDateTime.monthValue - 1, selectedDateTime.dayOfMonth
     )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text("Detail Task", style = MaterialTheme.typography.headlineSmall)
+    // --- UI COMPONENTS ---
 
-        // --- Input Judul & Deskripsi ---
-        OutlinedTextField(
+    // 1. FIXED GROUP FIELD (Task)
+    InputCard(label = "Group") {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconBox(color = IconPinkBg, icon = Icons.Filled.Work, tint = Color.White)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Task",
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black),
+                modifier = Modifier.weight(1f)
+            )
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.Black)
+        }
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    // 2. TASK NAME INPUT
+    InputCard(label = "Task Name") {
+        CustomTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Judul Task") },
-            placeholder = { Text("Contoh: Finalisasi Laporan ALP") },
-            isError = title.isBlank(),
-            modifier = Modifier.fillMaxWidth()
+            placeholder = "Visual Programming Week 11 API"
         )
-        OutlinedTextField(
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    // 3. DESCRIPTION INPUT
+    InputCard(label = "Description", minHeight = 120.dp) {
+        CustomTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("Deskripsi (Opsional)") },
-            modifier = Modifier.fillMaxWidth()
+            placeholder = "Making API for:\nCustomer\nOrder...",
+            singleLine = false
         )
+    }
 
-        // --- GANTI TEXT FIELD DENGAN BUTTON UNTUK MEMICU PICKER ---
-        OutlinedButton(
-            onClick = { datePickerDialog.show() },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+    Spacer(modifier = Modifier.height(40.dp))
+
+    // 4. DEADLINE PICKER
+    InputCard(label = "Deadline") {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { datePickerDialog.show() },
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            IconBox(color = IconPurpleBg, icon = Icons.Filled.DateRange, tint = PrimaryPurple)
+            Spacer(modifier = Modifier.width(16.dp))
             Text(
-                "Deadline: ${selectedDateTime.format(displayFormatter)}",
-                fontWeight = FontWeight.Normal
+                text = selectedDateTime.format(displayFormatter),
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black),
+                modifier = Modifier.weight(1f)
             )
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.Black)
         }
+    }
 
-        // --- INPUT DIFFICULTY (Dropdown) ---
-        var expanded by remember { mutableStateOf(false) }
+    Spacer(modifier = Modifier.height(20.dp))
 
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            OutlinedTextField(
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
-                readOnly = true,
-                value = difficulty,
-                onValueChange = {},
-                label = { Text("Difficulty") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
-            )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+    // 5. DIFFICULTY DROPDOWN
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        InputCard(label = "Difficulty") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = true },
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                difficulties.forEach { selectionOption ->
-                    DropdownMenuItem(
-                        text = { Text(selectionOption) },
-                        onClick = {
-                            difficulty = selectionOption
-                            expanded = false
-                        }
-                    )
-                }
+                IconBox(color = IconPinkBg, icon = Icons.Filled.TrackChanges, tint = Color.White)
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = difficulty,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black),
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.Black)
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                if (title.isNotBlank()) {
-                    // Konversi objek LocalDateTime ke string ISO 8601
-                    val dateTimeString = selectedDateTime.format(backendFormatter)
-
-                    // ViewModel akan menambahkan 'Z' di akhirnya
-                    viewModel.createNewTask(
-                        title,
-                        description.ifEmpty { null },
-                        dateTimeString,
-                        difficulty
-                    )
-                    onTaskCreated()
-                }
-            },
-            enabled = title.isNotBlank(),
-            modifier = Modifier.fillMaxWidth().height(50.dp)
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(Color.White)
         ) {
-            Text("Simpan Task")
+            difficulties.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        difficulty = option
+                        expanded = false
+                    }
+                )
+            }
         }
+    }
+
+    Spacer(modifier = Modifier.height(40.dp))
+
+    // 6. ADD TASK BUTTON
+    Button(
+        onClick = {
+            if (title.isNotBlank()) {
+                val dateTimeString = selectedDateTime.format(backendFormatter)
+                viewModel.createNewTask(title, description.ifEmpty { null }, dateTimeString, difficulty)
+                onTaskCreated()
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = PrimaryPurple),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text(
+            text = "Add Task",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = Color.White
+        )
+    }
+}
+
+// --- HELPER COMPONENTS ---
+
+@Composable
+fun InputCard(
+    label: String,
+    minHeight: Dp = 0.dp,
+    content: @Composable () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .defaultMinSize(minHeight = minHeight)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(color = TextGray, fontSize = 12.sp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            content()
+        }
+    }
+}
+
+@Composable
+fun CustomTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    singleLine: Boolean = true
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = {
+            Text(
+                text = placeholder,
+                style = MaterialTheme.typography.bodyLarge.copy(color = Color.Black.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+            )
+        },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = PrimaryPurple
+        ),
+        textStyle = TextStyle(
+            color = Color.Black,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp
+        ),
+        singleLine = singleLine,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(0.dp)
+    )
+}
+
+@Composable
+fun IconBox(color: Color, icon: ImageVector, tint: Color) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .background(color, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

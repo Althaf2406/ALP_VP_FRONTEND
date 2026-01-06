@@ -1,24 +1,22 @@
-// app/build.gradle.kts (Module Level)
-
 plugins {
-    // Terapkan Plugin Dasar (TANPA version, TANPA apply false)
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 
-    // Terapkan plugin Compose (jika tidak otomatis)
-    alias(libs.plugins.kotlin.compose)
-
-    // TIDAK ADA PLUGIN HILT ATAU KSP LAGI DI SINI
+    // FIX 1: Use the direct ID for the Compose Compiler (Kotlin 2.0+)
+    // If this fails, you likely need to upgrade Kotlin in your root build.gradle
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "com.example.alp_vp_frontend"
-    compileSdk = 36 // Atau versi terbaru
+    // FIX 2: Using 35 (Stable) instead of 36 to avoid "Missing SDK" errors
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.alp_vp_frontend"
         minSdk = 24
-        targetSdk = 36
+        // FIX 2: Match compileSdk
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -33,29 +31,31 @@ android {
             )
         }
     }
+
     compileOptions {
-        // Target Java 17 untuk stabilitas Compose
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
+
     buildFeatures {
         compose = true
+        // buildConfig = true // Uncomment if you need BuildConfig.DEBUG, etc.
     }
+
+    // Note: No composeOptions block needed for Kotlin 2.0 + Compose Plugin
 }
 
 dependencies {
-
-    // --- TIDAK ADA HILT/DAGGER LAGI ---
-
-    // --- Core & Activity (Versi Stabil) ---
+    // --- Core & Activity ---
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
 
-    // --- Jetpack Compose (Menggunakan BOM) ---
+    // --- Jetpack Compose ---
     implementation(platform("androidx.compose:compose-bom:2024.09.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -63,18 +63,18 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
 
-    // --- ViewModel & Navigation (Wajib untuk DI Manual) ---
+    // --- Navigation & VM ---
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.2")
 
-    // --- Data & Networking ---
+    // --- Data ---
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // --- UI & Layout Lainnya ---
+    // --- UI Libs ---
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
 
