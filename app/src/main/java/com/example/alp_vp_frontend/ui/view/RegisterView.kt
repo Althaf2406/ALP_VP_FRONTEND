@@ -1,11 +1,13 @@
 package com.example.alp_vp_frontend.ui.view
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,10 +25,11 @@ fun RegisterView(
 
     val loading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
-    val success by viewModel.success.collectAsState()
+    val loginResult by viewModel.loginResult.collectAsState()
+    val context = LocalContext.current
 
-    LaunchedEffect(success) {
-        if (success) {
+    LaunchedEffect(loginResult) {
+        if (loginResult != null) {
             viewModel.resetState()
             onRegisterSuccess()
         }
@@ -69,7 +72,15 @@ fun RegisterView(
 
         Button(
             onClick = {
-                viewModel.register(username, email, password)
+                if (username.isBlank() || email.isBlank() || password.isBlank()) {
+                    Toast.makeText(
+                        context,
+                        "Semua field wajib diisi",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    viewModel.register(username, email, password)
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !loading

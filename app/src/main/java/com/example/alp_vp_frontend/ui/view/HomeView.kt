@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun HomeView(
-    onNavigateToMoney: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -28,11 +27,11 @@ fun HomeView(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
-            onClick = onNavigateToMoney,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Money Management")
-        }
+//        Button(
+//            onClick = ,
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Text("Money Management")
+//        }
     }
 }

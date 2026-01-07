@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class FocusPhaseRepository(
-    private val api: FocusPhaseService
+    private val privateApi: FocusPhaseService
 ) {
 
     // ============================
@@ -15,7 +15,7 @@ class FocusPhaseRepository(
     suspend fun getByFocusId(focusId: Int): List<Phase> =
         withContext(Dispatchers.IO) {
             try {
-                val response = api.getByFocusId(focusId)
+                val response = privateApi.getByFocusId(focusId)
                 if (response.isSuccessful) {
                     response.body() ?: emptyList()
                 } else {
@@ -41,7 +41,7 @@ class FocusPhaseRepository(
                 "type" to type,
                 "duration" to duration
             )
-            val response = api.create(body)
+            val response = privateApi.create(body)
             if (response.isSuccessful) response.body() else null
         } catch (e: Exception) {
             e.printStackTrace()
@@ -57,7 +57,7 @@ class FocusPhaseRepository(
         updates: Map<String, Any>
     ): Phase? = withContext(Dispatchers.IO) {
         try {
-            val response = api.update(id, updates)
+            val response = privateApi.update(id, updates)
             if (response.isSuccessful) response.body() else null
         } catch (e: Exception) {
             e.printStackTrace()
@@ -71,7 +71,7 @@ class FocusPhaseRepository(
     suspend fun deletePhase(id: Int): Boolean =
         withContext(Dispatchers.IO) {
             try {
-                val response = api.delete(id)
+                val response = privateApi.delete(id)
                 response.isSuccessful
             } catch (e: Exception) {
                 e.printStackTrace()

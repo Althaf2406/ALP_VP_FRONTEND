@@ -20,5 +20,3 @@ interface AuthService {
         @Body request: RegisterRequest
     ): Response<RegisterResponse>
 }
-
-

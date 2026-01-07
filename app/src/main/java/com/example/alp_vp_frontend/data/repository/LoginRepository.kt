@@ -20,7 +20,7 @@ class LoginRepository(
             val body = response.body()
                 ?: throw Exception("Empty response body")
 
-            val token = body.token
+            val token = body.data.token
             tokenManager.saveToken(token)
 
             return body
