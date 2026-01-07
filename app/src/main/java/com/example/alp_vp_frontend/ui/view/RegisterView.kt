@@ -1,5 +1,6 @@
 package com.example.alp_vp_frontend.ui.view
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -8,33 +9,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.widget.Toast
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.alp_vp_frontend.ui.viewmodel.AuthViewModel
-import com.example.alp_vp_frontend.ui.viewmodel.MoneyViewModel
 
 @Composable
-fun LoginView(
+fun RegisterView(
     viewModel: AuthViewModel,
-    moneyViewModel: MoneyViewModel,
-    onLoginSuccess: () -> Unit,
-    onNavigateRegister: () -> Unit
+    onRegisterSuccess: () -> Unit,
+    onBackToLogin: () -> Unit
 ) {
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
     val loading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val loginResult by viewModel.loginResult.collectAsState()
-
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     val context = LocalContext.current
 
     LaunchedEffect(loginResult) {
         if (loginResult != null) {
             viewModel.resetState()
-            onLoginSuccess()
+            onRegisterSuccess()
         }
     }
 
@@ -45,7 +42,16 @@ fun LoginView(
         verticalArrangement = Arrangement.Center
     ) {
 
-        Text("Login", fontSize = 24.sp)
+        Text("Register", fontSize = 24.sp)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         OutlinedTextField(
             value = email,
@@ -62,31 +68,35 @@ fun LoginView(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = {
-                if (email.isBlank() || password.isBlank()) {
+                if (username.isBlank() || email.isBlank() || password.isBlank()) {
                     Toast.makeText(
                         context,
-                        "Email dan password wajib diisi",
+                        "Semua field wajib diisi",
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
-                    viewModel.login(email, password)
-                    viewModel.restoreUserFromToken()
+                    viewModel.register(username, email, password)
                 }
             },
-            enabled = !loading,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !loading
         ) {
-            Text(if (loading) "Loading..." else "Login")
+            Text(if (loading) "Loading..." else "Register")
         }
 
         error?.let {
+            Spacer(modifier = Modifier.height(8.dp))
             Text(it, color = Color.Red)
         }
 
-        TextButton(onClick = onNavigateRegister) {
-            Text("Register")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = onBackToLogin) {
+            Text("Sudah punya akun? Login")
         }
     }
 }

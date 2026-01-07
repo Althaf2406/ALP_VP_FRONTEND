@@ -16,6 +16,9 @@ import java.time.LocalDate //1. IMPORT LocalDate
 class ActivityViewModel(
     private val repository: ActivityRepository
 ) : ViewModel() {
+    init {
+        getAllActivities()
+    }
 
     // --- STATE FLOW ---
 

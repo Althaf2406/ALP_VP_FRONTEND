@@ -1,62 +1,47 @@
 package com.example.alp_vp_frontend.data.repository
 
 import com.example.alp_vp_frontend.data.dto.LoginRequest
-import com.example.alp_vp_frontend.data.dto.LoginResponse
 import com.example.alp_vp_frontend.data.dto.RegisterRequest
 import com.example.alp_vp_frontend.data.dto.User
 import com.example.alp_vp_frontend.data.local.TokenManager
+import com.example.alp_vp_frontend.data.service.AuthService
 import com.example.alp_vp_frontend.data.service.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class UserRepository(
+class AuthRepository(
     private val publicApi: UserService,
     private val privateApi: UserService,
+    private val authService: AuthService,
     private val tokenManager: TokenManager
 ) {
 
-    // =======================================================
-    // LOGIN
-    // =======================================================
-    suspend fun login(email: String, password: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val response = publicApi.login(LoginRequest(email, password))
+    suspend fun login(email: String, password: String) =
+        withContext(Dispatchers.IO) {
+            val response = authService.login(LoginRequest(email, password))
 
-                if (response.isSuccessful) {
-                    val token = response.body()?.token
-                    if (!token.isNullOrBlank()) {
-                        tokenManager.saveToken(token)
-                        true
-                    } else false
-                } else {
-                    println("❌ Login error: ${response.code()} ${response.message()}")
-                    false
+            if (response.isSuccessful) {
+                response.body()?.data?.token.let { token ->
+                    tokenManager.saveToken(token)
                 }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                false
             }
+
+            response
         }
+
+    suspend fun register(
+        username: String,
+        email: String,
+        password: String
+    ) = withContext(Dispatchers.IO) {
+        authService.register(
+            RegisterRequest(
+                username = username,
+                email = email,
+                password = password
+            )
+        )
     }
-
-
-    // =======================================================
-    // REGISTER
-    // =======================================================
-    suspend fun register(request: RegisterRequest): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val response = publicApi.register(request)
-                response.isSuccessful
-            } catch (e: Exception) {
-                e.printStackTrace()
-                false
-            }
-        }
-    }
-
 
     // =======================================================
     // GET CURRENT USER
@@ -94,3 +79,4 @@ class UserRepository(
         return tokenManager.getToken() != null
     }
 }
+
