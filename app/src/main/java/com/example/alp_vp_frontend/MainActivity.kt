@@ -43,6 +43,12 @@ enum class Screen {
     LOGOUT
 }
 
+enum class MoneyViewMode {
+    LIST,
+    GRAPH
+}
+
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,6 +64,8 @@ class MainActivity : ComponentActivity() {
                 val context = this
                 val tokenManager = remember { TokenManager(context) }
                 val appContainer = remember { AppContainer(context) }
+                var viewMode by remember { mutableStateOf(MoneyViewMode.LIST) }
+
 
                 // =========================
                 // GLOBAL STATE
@@ -67,7 +75,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 var currentScreen by remember {
-                    mutableStateOf(Screen.LOGOUT)
+                    mutableStateOf(Screen.MONEY)
                 }
 
                 var selectedFocusId by remember {
@@ -160,7 +168,9 @@ class MainActivity : ComponentActivity() {
                         Screen.MONEY -> {
                             MoneyView(
                                 moneyViewModel = moneyViewModel,
-                                authViewModel = authViewModel
+                                authViewModel = authViewModel,
+                                viewMode = viewMode,
+                                onChangeViewMode = { viewMode = it }
                             )
                         }
                         Screen.LOGOUT -> {
