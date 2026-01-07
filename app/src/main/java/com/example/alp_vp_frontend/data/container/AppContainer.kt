@@ -3,10 +3,12 @@ package com.example.alp_vp_frontend.data.container
 import android.content.Context
 import com.example.alp_vp_frontend.data.local.TokenManager
 import com.example.alp_vp_frontend.data.local.AuthInterceptor
+import com.example.alp_vp_frontend.data.repository.ActivityRepository
 import com.example.alp_vp_frontend.data.repository.AuthRepository
 import com.example.alp_vp_frontend.data.repository.FocusPhaseRepository
 import com.example.alp_vp_frontend.data.repository.FocusRepository
 import com.example.alp_vp_frontend.data.repository.MoneyRepository
+import com.example.alp_vp_frontend.data.service.ActivityService
 import com.example.alp_vp_frontend.data.service.AuthService
 import com.example.alp_vp_frontend.data.service.FocusPhaseService
 import com.example.alp_vp_frontend.data.service.FocusService
@@ -38,6 +40,7 @@ class AppContainer(context: Context) {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
+    // keep user services for AuthRepository but do not expose a separate userRepository
     private val publicUserService: UserService =
         publicRetrofit.create(UserService::class.java)
 
@@ -48,33 +51,40 @@ class AppContainer(context: Context) {
     val authService: AuthService =
         publicRetrofit.create(AuthService::class.java)
 
-    val userService: UserService =
-        privateRetrofit.create(UserService::class.java)
-
     val moneyService: MoneyService =
         privateRetrofit.create(MoneyService::class.java)
 
     val focusService: FocusService =
         privateRetrofit.create(FocusService::class.java)
 
-    val focusPhaseService: FocusService =
-        privateRetrofit.create(FocusService::class.java)
+    val focusPhaseService: FocusPhaseService =
+        privateRetrofit.create(FocusPhaseService::class.java)
+
+    private val activityService: ActivityService =
+        privateRetrofit.create(ActivityService::class.java)
 
     // ===== REPOSITORIES =====
     val authRepository =
         AuthRepository(
-            tokenManager = tokenManager,
-            authService = authService,
             publicApi = publicUserService,
-            privateApi = privateUserService
+            privateApi = privateUserService,
+            authService = authService,
+            tokenManager = tokenManager
         )
-
-
 
     val moneyRepository =
         MoneyRepository(moneyService)
 
     val focusRepository =
         FocusRepository(focusService)
-}
 
+    val focusPhaseRepository =
+        FocusPhaseRepository(focusPhaseService)
+
+    val activityRepository =
+        ActivityRepository(activityService)
+
+    val userRepository =
+        authRepository
+    // keep compatibility with existing ViewModelFactory reference name
+}

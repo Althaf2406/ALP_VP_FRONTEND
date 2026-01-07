@@ -44,9 +44,9 @@ fun ActivityView(
     val activities by viewModel.activitiesByDate.collectAsState()
 
     // Memuat data saat pertama kali layar dibuka
-    LaunchedEffect(Unit) {
-        viewModel.getAllActivities()
-    }
+//    LaunchedEffect(Unit) {
+//        viewModel.getAllActivities()
+//    }
 
         Column(
             modifier = Modifier
