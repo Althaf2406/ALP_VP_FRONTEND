@@ -1,16 +1,19 @@
 package com.example.alp_vp_frontend.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.alp_vp_frontend.data.container.AppContainer
-import com.example.alp_vp_frontend.data.container.MoneyContainer
 import com.example.alp_vp_frontend.data.dto.CreateMoneyRequest
 import com.example.alp_vp_frontend.data.dto.UpdateMoneyRequest
 import com.example.alp_vp_frontend.data.repository.MoneyRepository
 import com.example.alp_vp_frontend.ui.model.MoneyModel
+import com.example.alp_vp_frontend.ui.model.from
 import com.example.alp_vp_frontend.ui.model.fromList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.math.absoluteValue
 
 class MoneyViewModel(
     private val repository: MoneyRepository
@@ -28,6 +31,14 @@ class MoneyViewModel(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
+
+    private val _userId = MutableStateFlow<Int?>(null)
+    val userId = _userId.asStateFlow()
+
+    init {
+        loadMoney()
+    }
+
 
     // ===============================
     // DERIVED STATE
@@ -48,17 +59,24 @@ class MoneyViewModel(
     fun loadMoney() {
         viewModelScope.launch {
             _loading.value = true
-            _error.value = null
 
-            val response = repository.getAllMoney()
-            if (response?.isSuccessful == true) {
-                _moneyList.value =
-                    MoneyModel.fromList(response.body()?.data ?: emptyList())
-            } else {
-                _error.value = "Failed to load money (${response?.code()})"
+            try {
+                val response = repository.getAllMoney()
+
+                if (response?.isSuccessful == true) {
+                    val mapped = withContext(Dispatchers.Default) {
+                        MoneyModel.fromList(response?.body()?.data ?: emptyList())
+                    }
+                    _moneyList.value = mapped
+                } else {
+                    _error.value = "Failed ${response?.code()}"
+                }
+
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _loading.value = false
             }
-
-            _loading.value = false
         }
     }
 
@@ -68,31 +86,45 @@ class MoneyViewModel(
     fun createMoney(
         title: String,
         description: String,
-        amount: String,
+        amount: Int,
         type: String,
+        userId: Int,
         onSuccess: () -> Unit
     ) {
+
         viewModelScope.launch {
             _loading.value = true
-            _error.value = null
 
-            val response = repository.createMoney(
-                CreateMoneyRequest(
-                    title = title,
-                    description = description,
-                    amount = amount,
-                    type = type
-                )
-            )
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    repository.createMoney(
+                        CreateMoneyRequest(
+                            title = title,
+                            description = description,
+                            amount = amount,
+                            type = type,
+                            user_id = userId
+                        )
+                    )
+                }
 
-            if (response?.isSuccessful == true) {
-                loadMoney()
-                onSuccess()
-            } else {
-                _error.value = "Failed to create money (${response?.code()})"
+                if (response.isSuccessful) {
+                    response.body()?.data?.let { money ->
+                        val model = withContext(Dispatchers.Default) {
+                            MoneyModel.from(money)
+                        }
+                        _moneyList.value = _moneyList.value + model
+                    }
+                    Log.d("CREATE", "POST money called")
+
+                } else {
+                    _error.value = "Failed ${response.code()}"
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _loading.value = false
             }
-
-            _loading.value = false
         }
     }
 
@@ -130,6 +162,11 @@ class MoneyViewModel(
 
             _loading.value = false
         }
+    }
+
+    fun clearState() {
+        _moneyList.value = emptyList()
+        _error.value = null
     }
 
     // ===============================

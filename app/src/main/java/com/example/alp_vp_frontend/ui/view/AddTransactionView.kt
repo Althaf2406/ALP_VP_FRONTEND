@@ -1,5 +1,6 @@
 package com.example.alp_vp_frontend.ui.view
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,21 +22,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.alp_vp_frontend.ui.viewmodel.AuthViewModel
 import com.example.alp_vp_frontend.ui.viewmodel.MoneyViewModel
 
 
 @Composable
 fun AddTransactionView(
-    viewModel: MoneyViewModel,
+    moneyViewModel: MoneyViewModel,
+    authViewModel: AuthViewModel,
     onSuccess: () -> Unit
-) {
+){
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
     var type by remember { mutableStateOf("Outcome") } // default
+    var amountText by remember { mutableStateOf("") }
 
-    val loading by viewModel.loading.collectAsState()
-    val error by viewModel.error.collectAsState()
+
+    val loading by moneyViewModel.loading.collectAsState()
+    val error by moneyViewModel.error.collectAsState()
+    val userId by authViewModel.userId.collectAsState()
 
     Column(
         modifier = Modifier
@@ -66,8 +71,12 @@ fun AddTransactionView(
         )
 
         OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it },
+            value = amountText,
+            onValueChange = {
+                if (it.all { c -> c.isDigit() }) {
+                    amountText = it
+                }
+            },
             label = { Text("Jumlah") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -99,18 +108,43 @@ fun AddTransactionView(
 
         Button(
             onClick = {
-                val body = mapOf(
-                    "title" to title,
-                    "description" to description,
-                    "amount" to (amount.toIntOrNull() ?: 0),
-                    "type" to type
+                android.util.Log.d("BTN", "BUTTON CLICKED")
+
+                val amount = amountText.toIntOrNull()
+                val uid = userId
+
+                Log.d(
+                    "BTN",
+                    "title='${title}', amountText='${amountText}', amount=$amount, userId=$uid"
                 )
 
-                viewModel.createMoney(
+                if (title.isBlank()) {
+                    Log.d("BTN", "FAIL: title blank")
+                    return@Button
+                }
+
+                if (amount == null || amount <= 0) {
+                    Log.d("BTN", "FAIL: amount invalid")
+                    return@Button
+                }
+
+                if (uid == null) {
+                    Log.d("BTN", "FAIL: userId null")
+                    return@Button
+                }
+                if (amount == null || uid == null || title.isBlank()) {
+                    android.util.Log.d("BTN", "VALIDATION FAILED")
+                    return@Button
+                }
+
+                android.util.Log.d("BTN", "CALLING createMoney")
+
+                moneyViewModel.createMoney(
                     title = title,
                     description = description,
                     amount = amount,
-                    type = type
+                    type = type,
+                    userId = uid
                 ) {
                     onSuccess()
                 }

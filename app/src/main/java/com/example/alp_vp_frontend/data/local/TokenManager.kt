@@ -12,7 +12,7 @@ class TokenManager(context: Context) {
         private const val KEY_TOKEN = "jwt_token"
     }
 
-    fun saveToken(token: String) {
+    fun saveToken(token: String?) {
         prefs.edit().putString(KEY_TOKEN, token).apply()
     }
 
@@ -27,4 +27,6 @@ class TokenManager(context: Context) {
     fun hasToken(): Boolean {
         return getToken() != null
     }
+
+
 }

@@ -6,6 +6,5 @@ data class Money(
     val description: String,
     val id: Int,
     val title: String,
-    val type: String,
-    val user_id: Int
+    val type: String
 )
