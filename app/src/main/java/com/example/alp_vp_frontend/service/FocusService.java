@@ -1,3 +1,21 @@
+package com.example.alp_vp_frontend.service;
+
+import androidx.datastore.preferences.protobuf.Any;
+
+import com.example.alp_vp_frontend.data.dto.FocusListResponse;
+import com.example.alp_vp_frontend.data.dto.FocusResponse;
+
+import java.util.Map;
+
+import retrofit2.Response;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.PATCH;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+
+@ -1,49 +0,0 @@
 package com.example.alp_vp_frontend.data.service
 
 import com.example.alp_vp_frontend.data.dto.Focus
@@ -19,7 +37,7 @@ interface FocusService {
     // ============================
     @GET("focus/{id}")
     suspend fun getFocusById(
-        @Path("id") id: Int
+            @Path("id")id: Int
     ): Response<FocusResponse>
 
     // ============================
@@ -27,7 +45,7 @@ interface FocusService {
     // ============================
     @POST("focus")
     suspend fun createFocus(
-        @Body body: Focus
+            @Body body: Focus
     ): Response<FocusResponse>
 
     // ============================
@@ -36,7 +54,7 @@ interface FocusService {
     @PATCH("focus/{id}")
     suspend fun updateFocus(
         @Path("id") id: Int,
-        @Body updates: Map<String, Any>
+        @Body updates:Map<String, Any>
     ): Response<FocusResponse>
 
     // ============================
