@@ -4,45 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.alp_vp_frontend.data.container.AppContainer
 import com.example.alp_vp_frontend.data.local.TokenManager
-import com.example.alp_vp_frontend.data.repository.AuthRepository
+import com.example.alp_vp_frontend.ui.route.AppRoute
+import com.example.alp_vp_frontend.ui.route.Route
 import com.example.alp_vp_frontend.ui.theme.ALP_VP_FRONTENDTheme
-import com.example.alp_vp_frontend.ui.view.AuthScreen
-import com.example.alp_vp_frontend.ui.view.FocusView
-import com.example.alp_vp_frontend.ui.view.HomeView
-import com.example.alp_vp_frontend.ui.view.LoginView
-import com.example.alp_vp_frontend.ui.view.LogoutView
-import com.example.alp_vp_frontend.ui.view.MoneyView
 import com.example.alp_vp_frontend.ui.viewmodel.AuthViewModel
 import com.example.alp_vp_frontend.ui.viewmodel.FocusViewModel
 import com.example.alp_vp_frontend.ui.viewmodel.MoneyViewModel
-import com.example.alp_vp_frontend.ui.viewmodel.FocusPhaseViewModel
+import com.example.alp_vp_frontend.ui.viewmodel.ActivityViewModel
 
 // =========================
 // SCREEN STATE
 // =========================
-enum class Screen {
-    FOCUS_LIST,
-    FOCUS_DETAIL,
-    HOME,
-    MONEY,
-    LOGOUT
-}
-
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +30,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ALP_VP_FRONTENDTheme {
-
                 // =========================
                 // CORE DEPENDENCIES
                 // =========================
@@ -67,7 +45,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 var currentScreen by remember {
-                    mutableStateOf(Screen.LOGOUT)
+                    mutableStateOf(Route.Home)
                 }
 
                 var selectedFocusId by remember {
@@ -97,12 +75,11 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-//                val focusPhaseViewModel = remember {
-//                    FocusPhaseViewModel(
-//                        repository = appContainer.focusPhaseService
-//                    )
-//                }
-
+                val activityViewModel = remember {
+                    ActivityViewModel(
+                        repository = appContainer.activityRepository
+                    )
+                }
                 // =========================
                 // RESTORE USER FROM TOKEN
                 // =========================
@@ -110,68 +87,74 @@ class MainActivity : ComponentActivity() {
                     authViewModel.restoreUserFromToken()
                 }
 
+                val startDestination =
+                    if (tokenManager.getToken() != null) Route.Home.screenName
+                    else Route.Home.screenName
+
+                AppRoute(
+                    startDestination = startDestination,
+                    authViewModel = authViewModel,
+                    moneyViewModel = moneyViewModel,
+                    focusViewModel = focusViewModel,
+                    activityViewModel = activityViewModel
+                )
+
+
                 // =========================
                 // UI ROUTING
                 // =========================
-                if (!isLoggedIn) {
-
-                    AuthScreen(
-                        authViewModel = authViewModel,
-                        onLoginSuccess = {
-                            isLoggedIn = false
-                            currentScreen = Screen.LOGOUT
-                        },
-                        moneyViewModel = moneyViewModel
-                    )
-
-                } else {
-
-                    when (currentScreen) {
-
-                        Screen.FOCUS_LIST -> {
-                            FocusView(
-                                focusViewModel = focusViewModel,
-                                onFocusClick = { focus ->
-                                    selectedFocusId = focus.id
-                                    currentScreen = Screen.FOCUS_DETAIL
-                                }
-                            )
-                        }
-
-//                        Screen.FOCUS_DETAIL -> {
-//                            selectedFocusId?.let { focusId ->
-//                                FocusPhaseScreen(
-//                                    focusId = focusId,
-//                                    viewModel = focusPhaseViewModel,
-//                                    onBack = {
-//                                        currentScreen = Screen.FOCUS_LIST
-//                                    }
-//                                )
-//                            }
+//                if (!isLoggedIn) {
+//
+//                    AuthScreen(
+//                        authViewModel = authViewModel,
+//                        onLoginSuccess = {
+//                            isLoggedIn = false
+//                            currentScreen = Route.Home
+//                        },
+//                        moneyViewModel = moneyViewModel
+//                    )
+//
+//                } else {
+//
+//                    when (currentScreen) {
+//
+//
+//                        Route.Home -> {
+//                            HomeView()
 //                        }
-                        Screen.FOCUS_DETAIL -> {
-                            Text("Unknown Screen")
-                        }
-
-                        Screen.HOME -> {
-                            HomeView(
-                            )
-                        }
-                        Screen.MONEY -> {
-                            MoneyView(
-                                moneyViewModel = moneyViewModel,
-                                authViewModel = authViewModel
-                            )
-                        }
-                        Screen.LOGOUT -> {
-                            LogoutView(
-                                authViewModel = authViewModel,
-                                moneyViewModel = moneyViewModel,
-                            )
-                        }
-                    }
+//                        Route.Finance -> {
+//                            MoneyView(
+//                                moneyViewModel = moneyViewModel,
+//                                authViewModel = authViewModel
+//                            )
+//                        }
+//                        Route.Logout -> {
+//                            LogoutView(
+//                                authViewModel = authViewModel,
+//                                moneyViewModel = moneyViewModel,
+//                            )
+//                        }
+//                        Route.Login -> {
+//                            LoginView(
+//                                authViewModel = authViewModel,
+//                                moneyViewModel = moneyViewModel,
+//                                onLoginSuccess = {},
+//                                onNavigateRegister = {}
+//                            )
+//                        }
+//                        Route.Finance -> {
+//                            MoneyView(
+//                                moneyViewModel = moneyViewModel,
+//                                authViewModel = authViewModel
+//                            )
+//                        }
+//                        Route.ActivityCalendar -> {
+//                            ActivityView(
+//                                ActivityRepository
+//                            )
+//                    }
                 }
             }
         }
     }
-}
+

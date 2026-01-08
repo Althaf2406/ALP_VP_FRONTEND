@@ -59,13 +59,6 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         // Tombol 3: Focus Timer (contoh)
-        LargeMenuButton(
-            text = "Focus Timer",
-            icon = Icons.Default.Timer,
-            onClick = {
-                navController.navigate(Route.FocusTimer.screenName)
-            }
-        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
