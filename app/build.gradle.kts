@@ -1,24 +1,23 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-
-    // FIX 1: Use the direct ID for the Compose Compiler (Kotlin 2.0+)
-    // If this fails, you likely need to upgrade Kotlin in your root build.gradle
+    // Menggunakan plugin Compose terbaru (sesuai HEAD kamu agar kompatibel)
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "com.example.alp_vp_frontend"
-    // FIX 2: Using 35 (Stable) instead of 36 to avoid "Missing SDK" errors
+    // Gunakan 35 (HEAD) jika kamu yakin tim mau upgrade,
+    // TAPI kalau tim masih pake 34, ganti angka ini jadi 34.
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.alp_vp_frontend"
         minSdk = 24
-        // FIX 2: Match compileSdk
-        targetSdk = 35
+        targetSdk = 35 // Samakan dengan compileSdk
         versionCode = 1
         versionName = "1.0"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -32,58 +31,67 @@ android {
         }
     }
 
+    // --- BAGIAN INI PENTING (Punya Master) ---
+    // Kita pakai Java 11 & Desugaring punya Althaf supaya support HP Android lama
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "11" // Sesuaikan dengan Java 11 di atas
     }
+    // -----------------------------------------
 
     buildFeatures {
         compose = true
-        // buildConfig = true // Uncomment if you need BuildConfig.DEBUG, etc.
     }
-
-    // Note: No composeOptions block needed for Kotlin 2.0 + Compose Plugin
 }
 
 dependencies {
-    // --- Core & Activity ---
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
+    // --- PENTING: Core Library Desugaring (Punya Master) ---
+    // Ini wajib ada karena compileOptions di atas mengaktifkan desugaring
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
-    // --- Jetpack Compose ---
-    implementation(platform("androidx.compose:compose-bom:2024.09.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    // --- Android & Compose (Punya Master - Pakai libs.***) ---
+    // Menggunakan versi dari katalog tim agar seragam
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+
+    // --- Icons & Navigation (Gabungan) ---
     implementation("androidx.compose.material:material-icons-extended")
-
-    // --- Navigation & VM ---
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2") // Update ke versi stable terbaru
 
-    // --- Data ---
+    // --- Network & Data (Punya Master + Implementasi Kamu) ---
+    // Di Master sudah ada Retrofit & Coil, jadi fiturmu AMAN.
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0") // Pakai versi newer (4.12) punya kamu gpp
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Datastore (Punya Kamu lebih baru 1.1.1, kita pakai itu)
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // --- UI Libs ---
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    // Image Loading (Coil)
+    implementation("io.coil-kt:coil-compose:2.6.0") // Pakai versi 2.6.0 punya kamu biar support async image terbaru
+
+    // --- Async ---
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // --- Testing ---
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.09.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
