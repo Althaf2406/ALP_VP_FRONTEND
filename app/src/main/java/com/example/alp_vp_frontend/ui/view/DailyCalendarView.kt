@@ -38,13 +38,12 @@ private val cardColors = listOf(
 
 @Composable
 fun DailyScheduleView(
-    navController: NavController,
-    viewModel: ActivityViewModel,
+    calenderViewModel: ActivityViewModel,
     date: String // Menerima tanggal sebagai String dari argumen navigasi
 ) {
     // Ubah String tanggal menjadi objek LocalDate
     val selectedDate = LocalDate.parse(date)
-    val activitiesByDate by viewModel.activitiesByDate.collectAsState()
+    val activitiesByDate by calenderViewModel.activitiesByDate.collectAsState()
 
     // Ambil daftar aktivitas untuk tanggal yang dipilih, urutkan berdasarkan waktu mulai
     val activitiesForDay = activitiesByDate[selectedDate]?.sortedBy { it.start_time } ?: emptyList()

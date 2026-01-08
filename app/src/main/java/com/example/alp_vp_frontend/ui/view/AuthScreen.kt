@@ -19,7 +19,7 @@ fun AuthScreen(
 
     if (isLogin) {
         LoginView(
-            viewModel = authViewModel,
+            authViewModel = authViewModel,
             onLoginSuccess = {
                 onLoginSuccess()
             },

@@ -16,9 +16,6 @@ import java.time.LocalDate //1. IMPORT LocalDate
 class ActivityViewModel(
     private val repository: ActivityRepository
 ) : ViewModel() {
-    init {
-        getAllActivities()
-    }
 
     // --- STATE FLOW ---
 
@@ -32,6 +29,10 @@ class ActivityViewModel(
 
     private val _uiState = MutableStateFlow<String>("Idle")
     val uiState: StateFlow<String> = _uiState.asStateFlow()
+
+    init {
+        getAllActivities()
+    }
 
 
     // --- FUNGSI-FUNGSI ---

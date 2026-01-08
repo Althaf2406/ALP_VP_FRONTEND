@@ -18,14 +18,14 @@ import com.example.alp_vp_frontend.ui.viewmodel.MoneyViewModel
 
 @Composable
 fun LoginView(
-    viewModel: AuthViewModel,
+    authViewModel: AuthViewModel,
     moneyViewModel: MoneyViewModel,
     onLoginSuccess: () -> Unit,
     onNavigateRegister: () -> Unit
 ) {
-    val loading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val loginResult by viewModel.loginResult.collectAsState()
+    val loading by authViewModel.isLoading.collectAsState()
+    val error by authViewModel.error.collectAsState()
+    val loginResult by authViewModel.loginResult.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -33,7 +33,7 @@ fun LoginView(
 
     LaunchedEffect(loginResult) {
         if (loginResult != null) {
-            viewModel.resetState()
+            authViewModel.resetState()
             onLoginSuccess()
         }
     }
@@ -71,8 +71,8 @@ fun LoginView(
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
-                    viewModel.login(email, password)
-                    viewModel.restoreUserFromToken()
+                    authViewModel.login(email, password)
+                    authViewModel.restoreUserFromToken()
                 }
             },
             enabled = !loading,

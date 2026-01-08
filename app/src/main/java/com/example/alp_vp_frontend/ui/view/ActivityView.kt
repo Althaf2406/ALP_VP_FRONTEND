@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.alp_vp_frontend.ui.viewmodel.ActivityViewModel
+import com.example.alp_vp_frontend.ui.viewmodel.AuthViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -33,15 +34,16 @@ import java.util.Locale
 
 @Composable
 fun ActivityView(
-    navController: NavController,
-    viewModel: ActivityViewModel
+    navController : NavController,
+    authViewModel: AuthViewModel,
+    activityViewModel: ActivityViewModel
 ) {
     // State untuk bulan yang sedang ditampilkan
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     // State untuk tanggal yang sedang dipilih
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     // Mengambil data aktivitas dari ViewModel
-    val activities by viewModel.activitiesByDate.collectAsState()
+    val activities by activityViewModel.activitiesByDate.collectAsState()
 
     // Memuat data saat pertama kali layar dibuka
 //    LaunchedEffect(Unit) {
