@@ -6,6 +6,11 @@
 
     <application
         android:allowBackup="true"
+
+        android:usesCleartextTraffic="true"
+
+        android:theme="@style/Theme.ALP_VP_FRONTEND">
+
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"

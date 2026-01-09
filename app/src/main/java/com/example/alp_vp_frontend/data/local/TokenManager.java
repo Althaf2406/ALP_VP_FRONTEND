@@ -1,9 +1,10 @@
+
 package com.example.alp_vp_frontend.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
 
-class TokenManager(context: Context) {
+class TokenManager(context:Context) {
 
     private val prefs: SharedPreferences =
         context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)

@@ -1,3 +1,13 @@
+package com.example.alp_vp_frontend.data.repository;
+
+import androidx.datastore.preferences.protobuf.Any;
+
+import com.example.alp_vp_frontend.data.dto.FocusListResponse;
+import com.example.alp_vp_frontend.data.dto.FocusResponse;
+
+import java.util.Map;
+
+@ -1,91 +0,0 @@
 package com.example.alp_vp_frontend.data.repository
 
 import com.example.alp_vp_frontend.data.dto.Focus
@@ -60,7 +70,7 @@ class FocusRepository(
     // ============================
     // UPDATE FOCUS
     // ============================
-    suspend fun updateFocus(id: Int, updates: Map<String, Any>): Result<FocusResponse> {
+    suspend fun updateFocus(id: Int, updates:Map<String, Any>): Result<FocusResponse> {
         return try {
             val response = focusService.updateFocus(id, updates)
             if (response.isSuccessful && response.body() != null) {

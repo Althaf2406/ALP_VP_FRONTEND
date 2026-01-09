@@ -1,3 +1,21 @@
+package com.example.alp_vp_frontend.service;
+
+import androidx.datastore.preferences.protobuf.Any;
+
+import com.example.alp_vp_frontend.data.dto.LoginRequest;
+import com.example.alp_vp_frontend.data.dto.LoginResponse;
+import com.example.alp_vp_frontend.data.dto.RegisterRequest;
+import com.example.alp_vp_frontend.data.dto.User;
+
+import java.util.Map;
+
+import retrofit2.Response;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.PATCH;
+import retrofit2.http.POST;
+
+@ -1,41 +0,0 @@
 package com.example.alp_vp_frontend.data.service
 
 import com.example.alp_vp_frontend.data.dto.LoginRequest
@@ -14,7 +32,7 @@ interface UserService {
     // =============================
     @POST("auth/register")
     suspend fun register(
-        @Body body: RegisterRequest
+            @Body body:RegisterRequest
     ): Response<User>
 
     // =============================
@@ -22,7 +40,7 @@ interface UserService {
     // =============================
     @POST("auth/login")
     suspend fun login(
-        @Body body: LoginRequest
+        @Body body:LoginRequest
     ): Response<LoginResponse>
 
     // =============================
@@ -36,6 +54,6 @@ interface UserService {
     // =============================
     @PATCH("user/update")
     suspend fun updateUser(
-        @Body updates: Map<String, Any>
+        @Body updates:Map<String, Any>
     ): Response<User>
 }
